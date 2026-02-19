@@ -71,13 +71,6 @@ Sigue las instrucciones en pantalla para seleccionar tu red y conectarte.
 nmcli device wifi connect "NOMBRE_DE_TU_WIFI" password "TU_CONTRASEÑA" hidden yes
 ```
 
-* Una vez conectado, puedes continuar con la instalación:
-
-```bash
-pacstrap /mnt base linux linux-firmware networkmanager grub git
-```
-
-
 ## Descripción
 
 **Archider** es un instalador automatizado para Arch Linux diseñado para ser ejecutado **directamente después de `arch-chroot`**, con detección automática de hardware (portátil, GPU NVIDIA) y configuración completa del sistema, bootloader y dotfiles.
@@ -110,8 +103,8 @@ Una vez dentro del entorno `arch-chroot /mnt`:
 
 ```bash
 pacman -S git
-git clone https://github.com/Haidex3/Archider
-cd Archider
+git clone https://github.com/Haidex3/Archider-docs
+cd Archider-docs
 chmod +x install.sh
 ./install.sh
 exit

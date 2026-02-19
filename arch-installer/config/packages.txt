@@ -8,7 +8,6 @@ xdg-desktop-portal-hyprland
 waybar
 rofi
 alacritty
-wl-clipboard
 expect
 swww
 slurp
@@ -50,3 +49,4 @@ hicolor-icon-theme
 ttf-nerd-fonts-symbols
 ttf-nerd-fonts-symbols-common
 7zip
+clipboard

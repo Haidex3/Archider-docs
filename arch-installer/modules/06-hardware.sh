@@ -2,31 +2,31 @@
 set -e
 
 echo "========================================"
-echo "   Detectando hardware automáticamente"
+echo "      Automatically Detecting Hardware"
 echo "========================================"
 
 IS_LAPTOP=false
 HAS_NVIDIA=false
 
 # =========================================
-# Detectar portátil (batería presente)
+# Detect laptop (battery presence)
 # =========================================
 if [ -d /sys/class/power_supply/BAT0 ]; then
     IS_LAPTOP=true
 fi
 
 # =========================================
-# Detectar GPU NVIDIA
+# Detect NVIDIA GPU
 # =========================================
 if lspci | grep -qi nvidia; then
     HAS_NVIDIA=true
 fi
 
 # =========================================
-# Configuración portátil
+# Laptop configuration
 # =========================================
 if [[ "$IS_LAPTOP" == "true" ]]; then
-    echo "✔ Portátil detectado"
+    echo "Laptop detected"
 
     pacman -S --noconfirm --needed \
         brightnessctl \
@@ -40,33 +40,33 @@ if [[ "$IS_LAPTOP" == "true" ]]; then
     systemctl enable acpid
     systemctl enable power-profiles-daemon
 
-    # Suspender al cerrar tapa
+    # Suspend when laptop lid is closed
     sed -i 's/^#HandleLidSwitch=suspend/HandleLidSwitch=suspend/' /etc/systemd/logind.conf
 
 else
-    echo "✔ Sistema de escritorio detectado"
+    echo "Desktop system detected"
 
     pacman -S --noconfirm --needed ddcutil
 fi
 
 # =========================================
-# Configuración NVIDIA (si existe)
+# NVIDIA configuration (if present)
 # =========================================
 if [[ "$HAS_NVIDIA" == "true" ]]; then
-    echo "✔ GPU NVIDIA detectada"
+    echo "NVIDIA GPU detected"
 
     pacman -S --noconfirm --needed \
         nvidia \
         nvidia-utils \
         nvidia-settings
 
-    # Para Wayland (Hyprland)
+    # Enable DRM modesetting for Wayland (e.g., Hyprland)
     echo "options nvidia_drm modeset=1" > /etc/modprobe.d/nvidia.conf
 
 else
-    echo "✔ No se detectó NVIDIA"
+    echo "No NVIDIA GPU detected"
 fi
 
 echo "========================================"
-echo "   Configuración de hardware completa"
+echo "     Hardware configuration complete"
 echo "========================================"
