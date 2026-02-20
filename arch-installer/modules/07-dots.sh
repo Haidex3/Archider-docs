@@ -3,7 +3,7 @@ set -e
 
 echo "Instalando dotfiles..."
 
-su - $USERNAME -c "
+su - "$USERNAME" -c "
 mkdir -p ~/Documents/GitHub &&
 cd ~/Documents/GitHub &&
 git clone $DOTS_URL Archider &&
