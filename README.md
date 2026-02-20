@@ -12,64 +12,113 @@
 **Repository:** [https://github.com/Haidex3/Archider](https://github.com/Haidex3/Archider)
 
 ---
+Perfecto, estás en el **live ISO de Arch Linux** 👌 Te explico cómo conectarte a WiFi paso a paso.
 
+Arch usa **`iwctl` (iwd)** para conectarse inalámbricamente.
 
-## Conexión a Wi-Fi en la ISO de Arch Linux
+---
 
-Antes de comenzar con Archider, necesitas **tener acceso a Internet**, especialmente si vas a clonar repositorios o instalar paquetes.
-
-### 1. Verificar interfaces de red
+## 1️ Verifica que tu tarjeta WiFi esté detectada
 
 ```bash
 ip link
 ```
 
-Esto listará todas las interfaces de red disponibles. Las interfaces Wi-Fi suelen llamarse `wlan0`, `wlp2s0`, o algo similar.
+Deberías ver algo como `wlan0` o `wlp2s0`.
 
-### 2. Conectar usando `nmcli` (NetworkManager)
+---
 
-NetworkManager ya viene instalada en la ISO oficial de Arch Linux. Para conectarte a tu Wi-Fi:
-
-1. Listar redes disponibles:
+## 2️ Inicia iwctl
 
 ```bash
-nmcli device wifi list
+iwctl
 ```
 
-2. Conectarse a tu red Wi-Fi:
+Entrarás a un prompt interactivo que se ve así:
+
+```
+[iwd]#
+```
+
+---
+
+## 3️ Ver dispositivos WiFi
+
+Dentro de `iwctl`:
 
 ```bash
-nmcli device wifi connect "NOMBRE_DE_TU_WIFI" password "TU_CONTRASEÑA"
+device list
 ```
 
-> Reemplaza `"NOMBRE_DE_TU_WIFI"` y `"TU_CONTRASEÑA"` por los de tu red.
+Anota el nombre del dispositivo (ejemplo: `wlan0` o `wlp2s0`).
 
-3. Verificar conexión:
+---
+
+## 4️ Escanear redes
 
 ```bash
-ping -c 3 archlinux.org
+station wlan0 scan
 ```
 
-Si recibes respuestas, la conexión a Internet está activa.
-
-### 3. Conexión automática con `wifi-menu` (opcional)
-
-Si prefieres una interfaz tipo menú (solo en ISOs que incluyan `netctl`):
+(Luego)
 
 ```bash
-wifi-menu
+station wlan0 get-networks
 ```
 
-Sigue las instrucciones en pantalla para seleccionar tu red y conectarte.
+Cambia `wlan0` por el nombre real de tu interfaz.
 
-### 4. Notas importantes
+---
 
-* Asegúrate de que tu tarjeta Wi-Fi está soportada por el kernel de la ISO.
-* Para conexiones ocultas, `nmcli` permite usar:
+## 5️ Conectarte a tu red
 
 ```bash
-nmcli device wifi connect "NOMBRE_DE_TU_WIFI" password "TU_CONTRASEÑA" hidden yes
+station wlan0 connect NOMBRE_DE_TU_WIFI
 ```
+
+Si tiene contraseña, te la pedirá.
+
+Si el nombre tiene espacios:
+
+```bash
+station wlan0 connect "Mi Wifi Casa"
+```
+sino funciona se puede escribir:
+
+
+```bash
+station wlan0 connect
+```
+y presionar tab
+---
+
+## 6️ Verificar conexión
+
+Sal de iwctl:
+
+```bash
+exit
+```
+
+Y prueba:
+
+```bash
+ping archlinux.org
+```
+
+Si responde, ya estás conectado 🎉
+
+---
+
+# Método rápido (comando directo sin entrar al menú)
+
+También puedes hacerlo en una sola línea:
+
+```bash
+iwctl --passphrase "TU_PASSWORD" station wlan0 connect "TU_WIFI"
+```
+
+---
 
 ## Descripción
 
@@ -82,6 +131,106 @@ USB → arch-chroot → ./install.sh → reboot → sistema listo
 ```
 
 ---
+
+Perfecto 🔥 entonces ya estás conectado a WiFi y tienes:
+
+* Una partición **EFI** ya creada (la reutilizarás)
+* `nvme0n1p4` como partición donde quieres instalar Arch
+
+Vamos paso a paso.
+
+---
+
+# 1️ Verifica las particiones
+
+Primero confirma todo:
+
+```bash
+lsblk
+```
+
+Deberías ver algo así:
+
+```
+nvme0n1
+├─nvme0n1p1   (EFI)
+├─nvme0n1p2
+├─nvme0n1p3
+└─nvme0n1p4   (DESTINO ARCH)
+```
+
+---
+
+# 2️ Formatear SOLO la partición de instalación
+
+
+Si usarás ext4:
+
+```bash
+mkfs.ext4 /dev/nvme0n1p4
+```
+
+NO formatees la EFI si ya la usas para otros sistemas.
+
+---
+
+# 3️ Montar particiones
+
+### Monta la raíz:
+
+```bash
+mount /dev/nvme0n1p4 /mnt
+```
+
+### Monta la EFI (ejemplo si es p1):
+
+```bash
+mount /dev/nvme0n1p1 /mnt/boot
+```
+
+Si `/mnt/boot` no existe:
+
+```bash
+mkdir -p /mnt/boot
+mount /dev/nvme0n1p1 /mnt/boot
+```
+
+---
+
+# 4️Instalar sistema base
+
+```bash
+pacstrap /mnt base linux linux-firmware
+```
+
+Yo recomiendo agregar:
+
+```bash
+pacstrap /mnt base linux linux-firmware sudo nano networkmanager grub efibootmgr
+```
+
+---
+
+# 📄 5️⃣ Generar fstab
+
+```bash
+genfstab -U /mnt >> /mnt/etc/fstab
+```
+
+Verifica:
+
+```bash
+cat /mnt/etc/fstab
+```
+
+---
+
+# 6️ Entrar al sistema
+
+```bash
+arch-chroot /mnt
+```
+
 
 ## Requisitos mínimos
 
