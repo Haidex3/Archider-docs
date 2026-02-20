@@ -49,3 +49,4 @@ hicolor-icon-theme
 ttf-nerd-fonts-symbols
 ttf-nerd-fonts-symbols-common
 7zip
+rsync
