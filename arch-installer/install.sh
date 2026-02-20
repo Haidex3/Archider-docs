@@ -58,6 +58,7 @@ bash "$SCRIPT_DIR/modules/04-packages.sh"
 bash "$SCRIPT_DIR/modules/05-yay.sh"
 bash "$SCRIPT_DIR/modules/06-hardware.sh"
 bash "$SCRIPT_DIR/modules/07-dots.sh"
+bash "$SCRIPT_DIR/modules/08-hyprland-autostart.sh"
 
 echo
 echo "========================================"
