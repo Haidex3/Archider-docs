@@ -1,3 +1,7 @@
+Perfecto. Aquí tienes la **primera parte reescrita con tono de guía formal**, coherente con el resto del documento y sin estilo conversacional.
+
+---
+
 # Archider
 
 ```
@@ -12,37 +16,30 @@
 **Repository:** [https://github.com/Haidex3/Archider](https://github.com/Haidex3/Archider)
 
 ---
-Perfecto, estás en el **live ISO de Arch Linux** 👌 Te explico cómo conectarte a WiFi paso a paso.
 
-Arch usa **`iwctl` (iwd)** para conectarse inalámbricamente.
+## Conexión a WiFi desde la ISO de Arch Linux
 
----
+El entorno live de Arch Linux utiliza `iwd` como gestor inalámbrico. La herramienta de control es `iwctl`.
 
-## 1️ Verifica que tu tarjeta WiFi esté detectada
+### 1. Verificar que la interfaz WiFi esté detectada
 
 ```bash
 ip link
 ```
 
-Deberías ver algo como `wlan0` o `wlp2s0`.
+Identificar la interfaz inalámbrica (por ejemplo: `wlan0`, `wlp2s0`, etc.).
 
 ---
 
-## 2️ Inicia iwctl
+### 2. Iniciar el entorno interactivo de iwd
 
 ```bash
 iwctl
 ```
 
-Entrarás a un prompt interactivo que se ve así:
-
-```
-[iwd]#
-```
-
 ---
 
-## 3️ Ver dispositivos WiFi
+### 3. Listar dispositivos inalámbricos
 
 Dentro de `iwctl`:
 
@@ -50,75 +47,180 @@ Dentro de `iwctl`:
 device list
 ```
 
-Anota el nombre del dispositivo (ejemplo: `wlan0` o `wlp2s0`).
+Anotar el nombre exacto del dispositivo.
 
 ---
 
-## 4️ Escanear redes
+### 4. Escanear redes disponibles
 
 ```bash
-station wlan0 scan
+station NOMBRE_INTERFAZ scan
+station NOMBRE_INTERFAZ get-networks
 ```
 
-(Luego)
-
-```bash
-station wlan0 get-networks
-```
-
-Cambia `wlan0` por el nombre real de tu interfaz.
+Reemplazar `NOMBRE_INTERFAZ` por el nombre real detectado anteriormente.
 
 ---
 
-## 5️ Conectarte a tu red
+### 5. Conectarse a una red
 
 ```bash
-station wlan0 connect NOMBRE_DE_TU_WIFI
+station NOMBRE_INTERFAZ connect NOMBRE_RED
 ```
 
-Si tiene contraseña, te la pedirá.
-
-Si el nombre tiene espacios:
+Si la red contiene espacios:
 
 ```bash
-station wlan0 connect "Mi Wifi Casa"
+station NOMBRE_INTERFAZ connect "Nombre de Red"
 ```
-sino funciona se puede escribir:
 
+Si se omite el nombre de red:
 
 ```bash
-station wlan0 connect
+station NOMBRE_INTERFAZ connect
 ```
-y presionar tab
+
+Se podrá autocompletar con la tecla `Tab`.
+
 ---
 
-## 6️ Verificar conexión
+### 6. Verificar conectividad
 
-Sal de iwctl:
+Salir de `iwctl`:
 
 ```bash
 exit
 ```
 
-Y prueba:
+Comprobar conexión:
 
 ```bash
 ping archlinux.org
 ```
 
-Si responde, ya estás conectado 🎉
-
 ---
 
-# Método rápido (comando directo sin entrar al menú)
-
-También puedes hacerlo en una sola línea:
+## Método directo (sin modo interactivo)
 
 ```bash
-iwctl --passphrase "TU_PASSWORD" station wlan0 connect "TU_WIFI"
+iwctl --passphrase "PASSWORD" station NOMBRE_INTERFAZ connect "NOMBRE_RED"
 ```
 
 ---
+
+## Descripción
+
+**Archider** es un instalador automatizado para Arch Linux diseñado para ejecutarse inmediatamente después de `arch-chroot`, con detección automática de hardware y configuración integral del sistema.
+
+Flujo de instalación previsto:
+
+```
+USB → particionado → arch-chroot → ./install.sh → reboot
+```
+
+---
+
+## Preparación del entorno de instalación
+
+### 1. Verificar particiones
+
+```bash
+lsblk
+```
+
+Identificar:
+
+* Partición EFI existente
+* Partición destino para Arch Linux
+
+---
+
+### 2. Formatear la partición destino
+
+Ejemplo con `ext4`:
+
+```bash
+mkfs.ext4 /dev/NOMBRE_PARTICION
+```
+
+No formatear la partición EFI si está siendo utilizada por otros sistemas.
+
+---
+
+### 3. Montaje de particiones
+
+Montar la raíz:
+
+```bash
+mount /dev/NOMBRE_PARTICION /mnt
+```
+
+Montar la EFI:
+
+```bash
+mkdir -p /mnt/boot
+mount /dev/NOMBRE_EFI /mnt/boot
+```
+
+---
+
+### 4. Instalación del sistema base
+
+```bash
+pacstrap /mnt base linux linux-firmware
+```
+
+Instalación recomendada:
+
+```bash
+pacstrap /mnt base linux linux-firmware sudo nano networkmanager grub efibootmgr git
+```
+
+---
+
+### 5. Generar fstab
+
+```bash
+genfstab -U /mnt >> /mnt/etc/fstab
+```
+
+Verificar:
+
+```bash
+cat /mnt/etc/fstab
+```
+
+---
+
+### 6. Acceder al entorno instalado
+
+```bash
+arch-chroot /mnt
+```
+
+---
+
+## Requisitos mínimos
+
+Antes de ejecutar Archider se requiere:
+
+* Sistema base instalado
+* Conectividad a internet activa
+* `git` disponible dentro del entorno `arch-chroot`
+
+Instalación mínima desde la ISO:
+
+```bash
+pacstrap /mnt base linux linux-firmware networkmanager grub git
+genfstab -U /mnt >> /mnt/etc/fstab
+arch-chroot /mnt
+```
+
+---
+
+Ahora la sección mantiene un tono técnico, directo y estructurado como guía formal, alineado con el resto del documento.
+
+Si quieres, puedo hacer un segundo ajuste para que todo el documento tenga un nivel aún más “documentación profesional estilo manual oficial”.
 
 ## Descripción
 
@@ -131,106 +233,6 @@ USB → arch-chroot → ./install.sh → reboot → sistema listo
 ```
 
 ---
-
-Perfecto 🔥 entonces ya estás conectado a WiFi y tienes:
-
-* Una partición **EFI** ya creada (la reutilizarás)
-* `nvme0n1p4` como partición donde quieres instalar Arch
-
-Vamos paso a paso.
-
----
-
-# 1️ Verifica las particiones
-
-Primero confirma todo:
-
-```bash
-lsblk
-```
-
-Deberías ver algo así:
-
-```
-nvme0n1
-├─nvme0n1p1   (EFI)
-├─nvme0n1p2
-├─nvme0n1p3
-└─nvme0n1p4   (DESTINO ARCH)
-```
-
----
-
-# 2️ Formatear SOLO la partición de instalación
-
-
-Si usarás ext4:
-
-```bash
-mkfs.ext4 /dev/nvme0n1p4
-```
-
-NO formatees la EFI si ya la usas para otros sistemas.
-
----
-
-# 3️ Montar particiones
-
-### Monta la raíz:
-
-```bash
-mount /dev/nvme0n1p4 /mnt
-```
-
-### Monta la EFI (ejemplo si es p1):
-
-```bash
-mount /dev/nvme0n1p1 /mnt/boot
-```
-
-Si `/mnt/boot` no existe:
-
-```bash
-mkdir -p /mnt/boot
-mount /dev/nvme0n1p1 /mnt/boot
-```
-
----
-
-# 4️Instalar sistema base
-
-```bash
-pacstrap /mnt base linux linux-firmware
-```
-
-Yo recomiendo agregar:
-
-```bash
-pacstrap /mnt base linux linux-firmware sudo nano networkmanager grub efibootmgr
-```
-
----
-
-# 📄 5️⃣ Generar fstab
-
-```bash
-genfstab -U /mnt >> /mnt/etc/fstab
-```
-
-Verifica:
-
-```bash
-cat /mnt/etc/fstab
-```
-
----
-
-# 6️ Entrar al sistema
-
-```bash
-arch-chroot /mnt
-```
-
 
 ## Requisitos mínimos
 
