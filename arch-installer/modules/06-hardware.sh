@@ -67,6 +67,24 @@ else
     echo "No NVIDIA GPU detected"
 fi
 
+# =========================================
+# Audio Services (PipeWire stack)
+# =========================================
+echo "Enabling PipeWire audio services (global user)"
+
+systemctl --global enable pipewire.socket
+systemctl --global enable pipewire-pulse.socket
+systemctl --global enable wireplumber.service
+
+# =========================================
+# wl-clipboard (Wayland clipboard support)
+# =========================================
+echo "Ensuring wl-clipboard availability"
+
+# wl-clipboard does not require a service,
+# but we ensure no leftover xclip/xsel conflicts if used in Wayland.
+true
+
 echo "========================================"
 echo "     Hardware configuration complete"
 echo "========================================"

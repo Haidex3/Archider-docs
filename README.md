@@ -1,7 +1,3 @@
-Perfecto. Aquí tienes la **primera parte reescrita con tono de guía formal**, coherente con el resto del documento y sin estilo conversacional.
-
----
-
 # Archider
 
 ```
@@ -17,21 +13,24 @@ Perfecto. Aquí tienes la **primera parte reescrita con tono de guía formal**, 
 
 ---
 
-## Conexión a WiFi desde la ISO de Arch Linux
+# Connecting to WiFi from the Arch Linux ISO
 
-El entorno live de Arch Linux utiliza `iwd` como gestor inalámbrico. La herramienta de control es `iwctl`.
+The Arch Linux live environment uses `iwd` as the wireless manager.
+The control utility is `iwctl`.
 
-### 1. Verificar que la interfaz WiFi esté detectada
+---
+
+## 1. Verify that the WiFi interface is detected
 
 ```bash
 ip link
 ```
 
-Identificar la interfaz inalámbrica (por ejemplo: `wlan0`, `wlp2s0`, etc.).
+Identify the wireless interface (for example: `wlan0`, `wlp2s0`, etc.).
 
 ---
 
-### 2. Iniciar el entorno interactivo de iwd
+## 2. Start the interactive iwd environment
 
 ```bash
 iwctl
@@ -39,60 +38,60 @@ iwctl
 
 ---
 
-### 3. Listar dispositivos inalámbricos
+## 3. List wireless devices
 
-Dentro de `iwctl`:
+Inside `iwctl`:
 
 ```bash
 device list
 ```
 
-Anotar el nombre exacto del dispositivo.
+Note the exact device name.
 
 ---
 
-### 4. Escanear redes disponibles
+## 4. Scan available networks
 
 ```bash
-station NOMBRE_INTERFAZ scan
-station NOMBRE_INTERFAZ get-networks
+station INTERFACE_NAME scan
+station INTERFACE_NAME get-networks
 ```
 
-Reemplazar `NOMBRE_INTERFAZ` por el nombre real detectado anteriormente.
+Replace `INTERFACE_NAME` with the real detected interface name.
 
 ---
 
-### 5. Conectarse a una red
+## 5. Connect to a network
 
 ```bash
-station NOMBRE_INTERFAZ connect NOMBRE_RED
+station INTERFACE_NAME connect NETWORK_NAME
 ```
 
-Si la red contiene espacios:
+If the network name contains spaces:
 
 ```bash
-station NOMBRE_INTERFAZ connect "Nombre de Red"
+station INTERFACE_NAME connect "Network Name"
 ```
 
-Si se omite el nombre de red:
+If the network name is omitted:
 
 ```bash
-station NOMBRE_INTERFAZ connect
+station INTERFACE_NAME connect
 ```
 
-Se podrá autocompletar con la tecla `Tab`.
+You can autocomplete with the `Tab` key.
 
 ---
 
-### 6. Verificar conectividad
+## 6. Verify connectivity
 
-Salir de `iwctl`:
+Exit `iwctl`:
 
 ```bash
 exit
 ```
 
-Comprobar conexión:
+Check connection:
 
 ```bash
 ping archlinux.org
@@ -100,77 +99,65 @@ ping archlinux.org
 
 ---
 
-## Método directo (sin modo interactivo)
+# Direct Method (Non-Interactive Mode)
 
 ```bash
-iwctl --passphrase "PASSWORD" station NOMBRE_INTERFAZ connect "NOMBRE_RED"
+iwctl --passphrase "PASSWORD" station INTERFACE_NAME connect "NETWORK_NAME"
 ```
 
 ---
 
-## Descripción
+# Installation Environment Preparation
 
-**Archider** es un instalador automatizado para Arch Linux diseñado para ejecutarse inmediatamente después de `arch-chroot`, con detección automática de hardware y configuración integral del sistema.
-
-Flujo de instalación previsto:
-
-```
-USB → particionado → arch-chroot → ./install.sh → reboot
-```
-
----
-
-## Preparación del entorno de instalación
-
-### 1. Verificar particiones
+## 1. Verify partitions
 
 ```bash
 lsblk
 ```
 
-Identificar:
+Identify:
 
-* Partición EFI existente
-* Partición destino para Arch Linux
-
----
-
-### 2. Formatear la partición destino
-
-Ejemplo con `ext4`:
-
-```bash
-mkfs.ext4 /dev/NOMBRE_PARTICION
-```
-
-No formatear la partición EFI si está siendo utilizada por otros sistemas.
+* Existing EFI partition
+* Target partition for Arch Linux
 
 ---
 
-### 3. Montaje de particiones
+## 2. Format the target partition
 
-Montar la raíz:
+Example using `ext4`:
 
 ```bash
-mount /dev/NOMBRE_PARTICION /mnt
+mkfs.ext4 /dev/PARTITION_NAME
 ```
 
-Montar la EFI:
+Do not format the EFI partition if it is used by other operating systems.
+
+---
+
+## 3. Mount partitions
+
+Mount root:
+
+```bash
+mount /dev/PARTITION_NAME /mnt
+```
+
+Mount EFI:
 
 ```bash
 mkdir -p /mnt/boot
-mount /dev/NOMBRE_EFI /mnt/boot
+mount /dev/EFI_PARTITION /mnt/boot
 ```
 
 ---
 
-### 4. Instalación del sistema base
+## 4. Install the base system
 
 ```bash
 pacstrap /mnt base linux linux-firmware
 ```
 
-Instalación recomendada:
+Recommended installation:
 
 ```bash
 pacstrap /mnt base linux linux-firmware sudo nano networkmanager grub efibootmgr git
@@ -178,13 +165,13 @@ pacstrap /mnt base linux linux-firmware sudo nano networkmanager grub efibootmgr
 
 ---
 
-### 5. Generar fstab
+## 5. Generate fstab
 
 ```bash
 genfstab -U /mnt >> /mnt/etc/fstab
 ```
 
-Verificar:
+Verify:
 
 ```bash
 cat /mnt/etc/fstab
@@ -192,7 +179,7 @@ cat /mnt/etc/fstab
 
 ---
 
-### 6. Acceder al entorno instalado
+## 6. Enter the installed environment
 
 ```bash
 arch-chroot /mnt
@@ -200,57 +187,19 @@ arch-chroot /mnt
 
 ---
 
-## Requisitos mínimos
+# Description
 
-Antes de ejecutar Archider se requiere:
+**Archider** is an automated Arch Linux installer designed to be executed **directly after `arch-chroot`**, featuring automatic hardware detection (laptop, NVIDIA GPU) and complete system, bootloader, and dotfiles configuration.
 
-* Sistema base instalado
-* Conectividad a internet activa
-* `git` disponible dentro del entorno `arch-chroot`
+Objective:
 
-Instalación mínima desde la ISO:
-
-```bash
-pacstrap /mnt base linux linux-firmware networkmanager grub git
-genfstab -U /mnt >> /mnt/etc/fstab
-arch-chroot /mnt
+```
+USB → arch-chroot → ./install.sh → reboot → ready system
 ```
 
 ---
 
-Ahora la sección mantiene un tono técnico, directo y estructurado como guía formal, alineado con el resto del documento.
-
-Si quieres, puedo hacer un segundo ajuste para que todo el documento tenga un nivel aún más “documentación profesional estilo manual oficial”.
-
-## Descripción
-
-**Archider** es un instalador automatizado para Arch Linux diseñado para ser ejecutado **directamente después de `arch-chroot`**, con detección automática de hardware (portátil, GPU NVIDIA) y configuración completa del sistema, bootloader y dotfiles.
-
-Objetivo:
-
-```
-USB → arch-chroot → ./install.sh → reboot → sistema listo
-```
-
----
-
-## Requisitos mínimos
-
-Antes de ejecutar Archider necesitas **lo mínimo para clonar un repositorio Git**.
-
-Desde la ISO de Arch Linux:
-
-```bash
-pacstrap /mnt base linux linux-firmware networkmanager grub git
-genfstab -U /mnt >> /mnt/etc/fstab
-arch-chroot /mnt
-```
-
----
-
-## Instalación (dentro de arch-chroot)
-
-Una vez dentro del entorno `arch-chroot /mnt`:
+# Installation (Inside arch-chroot)
 
 ```bash
 pacman -S git
@@ -262,28 +211,30 @@ exit
 reboot
 ```
 
-El script se encargará de:
+The script handles:
 
-* Configuración regional y de teclado
-* Creación de usuario y sudo
-* Instalación de GRUB (UEFI)
-* Detección automática de:
+* Regional and keyboard configuration
+* User creation and sudo setup
+* GRUB installation (UEFI)
+* Automatic detection of:
 
-  * Portátil (batería)
-  * GPU NVIDIA
-* Instalación de paquetes base
-* Instalación de dotfiles
-* Configuración de energía, brillo y drivers gráficos
+  * Laptop (battery)
+  * NVIDIA GPU
+* Base package installation
+* Dotfiles installation
+* Power, brightness, and graphics driver configuration
 
 ---
 
-## Detección automática de hardware
+# Automatic Hardware Detection
 
-Archider **no pregunta** si el sistema es portátil o PC.
+Archider **does not prompt** whether the system is a laptop or desktop.
 
-### Portátil (batería detectada)
+---
 
-Se instalan automáticamente:
+## Laptop (Battery Detected)
+
+Automatically installs:
 
 * `brightnessctl`
 * `tlp`
@@ -291,41 +242,47 @@ Se instalan automáticamente:
 * `upower`
 * `power-profiles-daemon`
 
-Y se habilitan los servicios correspondientes.
+And enables the corresponding services.
 
-### PC
+---
 
-Se instala:
+## Desktop PC
 
-* `ddcutil` (control de brillo por DDC/CI)
+Installs:
 
-### GPU NVIDIA (si se detecta)
+* `ddcutil` (brightness control via DDC/CI)
 
-Se instalan:
+---
+
+## NVIDIA GPU (If Detected)
+
+Installs:
 
 * `nvidia`
 * `nvidia-utils`
 * `nvidia-settings`
 
-Además se habilita Wayland correctamente (`nvidia_drm modeset=1`).
+Also properly enables Wayland support (`nvidia_drm modeset=1`).
 
 ---
 
-## Gestión de paquetes
+# Package Management
 
-### Paquetes base
+## Base Packages
 
-Se definen en:
+Defined in:
 
 ```
 config/packages.txt
 ```
 
-Aquí van **solo los paquetes comunes a todos los sistemas**.
+This file should contain **only packages common to all systems**.
 
-### Paquetes específicos por hardware
+---
 
-Se gestionan automáticamente en:
+## Hardware-Specific Packages
+
+Managed automatically in:
 
 ```
 modules/07-hardware.sh
@@ -333,15 +290,15 @@ modules/07-hardware.sh
 
 ---
 
-## Sincronización de dotfiles
+# Dotfiles Synchronization
 
-Una vez instalado el sistema, puedes sincronizar manualmente tus dotfiles:
+Once the system is installed, you may manually sync your dotfiles:
 
 ```bash
 ./sync-dotfiles.sh
 ```
 
-Para traer cambios desde el repositorio remoto:
+To pull changes from the remote repository:
 
 ```bash
 ./sync-dotfiles.sh --pull
@@ -349,9 +306,9 @@ Para traer cambios desde el repositorio remoto:
 
 ---
 
-## Temas GTK / Iconos / Fuentes
+# GTK Themes / Icons / Fonts
 
-Configuración de temas vía `gsettings`:
+Theme configuration via `gsettings`:
 
 ```bash
 gsettings set org.gnome.desktop.interface gtk-theme Default
@@ -359,7 +316,7 @@ gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark
 gsettings set org.gnome.desktop.interface font-name "Sans 10"
 ```
 
-Asignar permisos correctos a temas locales:
+Assign proper permissions to local themes:
 
 ```bash
 chown -R $USER:$USER ~/.local/share/themes
@@ -367,7 +324,7 @@ chown -R $USER:$USER ~/.local/share/themes
 
 ---
 
-## Spicetify
+# Spicetify
 
 ```bash
 spicetify backup
@@ -377,9 +334,9 @@ spicetify apply
 
 ---
 
-## Utilidades adicionales
+# Additional Utilities
 
-Instalación manual (si se requieren):
+Manual installation (if required):
 
 ```bash
 sudo pacman -S fftw
@@ -388,7 +345,7 @@ sudo pacman -S ddcutil
 sudo pacman -S qt5ct
 ```
 
-Configuración de Qt:
+Qt configuration:
 
 ```bash
 export QT_QPA_PLATFORMTHEME=qt5ct
@@ -396,7 +353,7 @@ export QT_QPA_PLATFORMTHEME=qt5ct
 
 ---
 
-## Empaquetar extensiones (ej. Firefox)
+# Packaging Extensions (Example: Firefox)
 
 ```bash
 zip -r ../dark-contrast-1.3.xpi .
@@ -404,7 +361,7 @@ zip -r ../dark-contrast-1.3.xpi .
 
 ---
 
-## Servicios recomendados
+# Recommended Services
 
 ```bash
 sudo systemctl enable upower
@@ -414,9 +371,9 @@ sudo systemctl enable power-profiles-daemon
 
 ---
 
-## Configuración de shell
+# Shell Configuration
 
-### `~/.bash_profile`
+## `~/.bash_profile`
 
 ```bash
 [[ -f ~/.bashrc ]] && . ~/.bashrc
@@ -430,10 +387,10 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ---
 
-### `~/.bashrc`
+## `~/.bashrc`
 
 ```bash
-# If not running interactively, don't do anything
+# If not running interactively, do nothing
 [[ $- != *i* ]] && return
 
 alias ls='ls --color=auto'
@@ -452,38 +409,63 @@ eval "$(ssh-agent -s)" > /dev/null
 
 ---
 
-## Resultado final
+# Final Result
 
-Después del reboot tendrás:
+After reboot, the system will have:
 
-* Arch Linux funcional
-* GRUB configurado
-* Usuario listo
-* Red activa
-* Hyprland
-* Drivers correctos
-* Dotfiles aplicados
-* Sistema adaptado automáticamente a tu hardware
+* Functional Arch Linux
+* GRUB configured
+* User account ready
+* Network active
+* Hyprland installed
+* Correct drivers installed
+* Dotfiles applied
+* System automatically adapted to your hardware
 
 ---
 
-## Nota final
+# Firefox Configuration
 
-Este proyecto está pensado para **uso personal avanzado**, pero su estructura es lo suficientemente limpia como para evolucionar a una herramienta pública.
+For Firefox visual customizations (such as `userChrome.css` or `userContent.css`) to function properly, custom stylesheet support must be enabled.
 
-> Archider no intenta ser Archinstall
-> Archider es *tu* Arch
+---
 
-Si quieres, en el siguiente paso podemos:
+## 1 Enable `userChrome.css` Support
 
-* Añadir modo no interactivo
-* Logging a `/var/log/archider.log`
-* Flags tipo `--minimal`, `--full`
-* Detección automática de CPU (microcode)
+1. Open Firefox.
 
-Esto ya es **portfolio-level serio**.
+2. In the address bar, type:
 
+   ```
+   about:config
+   ```
 
-# Archider-docs
+3. Accept the security warning.
 
-toolkit.legacyUserProfileCustomizations.stylesheets = true
+4. Search for the following preference:
+
+   ```
+   toolkit.legacyUserProfileCustomizations.stylesheets
+   ```
+
+5. Set its value to:
+
+   ```
+   true
+   ```
+
+This allows Firefox to load custom CSS files from the user profile.
+
+---
+
+## 2 Install the Custom Extension
+
+Install the extension included in the repository:
+
+```
+firefox/extension
+```
+
+Available at:
+
+[https://github.com/Haidex3/Archider/tree/main/firefox/extension](https://github.com/Haidex3/Archider/tree/main/firefox/extension)

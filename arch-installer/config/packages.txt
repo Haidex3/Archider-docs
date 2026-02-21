@@ -4,6 +4,12 @@ firefox
 kitty
 hyprland
 pipewire
+pipewire-alsa
+pipewire-pulse
+pipewire-jack
+pipewire-audio
+pipewire-bluetooth
+wireplumber
 xdg-desktop-portal-hyprland
 waybar
 rofi
@@ -13,6 +19,7 @@ swww
 slurp
 grim
 wl-clipboard
+cliphist
 pamixer
 pavucontrol
 lxappearance
