@@ -16,7 +16,7 @@ cd yay &&
 makepkg -f --noconfirm
 "
 
-PACMAN_PKG=$(find "$BUILD_DIR/yay" -maxdepth 1 -type f -name "yay-*.pkg.tar.zst" | head -n1)
+PACMAN_PKG=$(find "$BUILD_DIR/yay" -maxdepth 1 -type f -name "yay-[0-9]*.pkg.tar.zst" | head -n1)
 
 if [ -f "$PACMAN_PKG" ]; then
     echo "Installing $PACMAN_PKG..."
