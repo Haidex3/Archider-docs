@@ -8,7 +8,6 @@ pipewire-alsa
 pipewire-pulse
 pipewire-jack
 pipewire-audio
-pipewire-bluetooth
 wireplumber
 xdg-desktop-portal-hyprland
 waybar
